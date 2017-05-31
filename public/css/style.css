@@ -1,0 +1,86 @@
+/**
+ * Fix user-agent
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+button {
+  color: #fff;
+  background-color: #4f2cad;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  line-height: 1.25;
+  cursor: pointer;
+  outline: none;
+  transition: 0.2s;
+  width: 5rem;
+}
+
+button:hover {
+  background-color: #795bcc;
+}
+
+
+/**
+ * Canvas
+ */
+
+.whiteboard {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: url(../imgs/paintbrush.png), auto;
+}
+
+.toolbar {
+  height: 3rem;
+  background-color: #111;
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.colors {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.color {
+  flex: 1;
+  cursor: pointer;
+}
+
+.color.black {
+  background-color: black;
+}
+
+.color.red {
+  background-color: red;
+}
+
+.color.green {
+  background-color: green;
+}
+
+.color.blue {
+  background-color: blue;
+}
+
+.color.yellow {
+  background-color: yellow;
+}

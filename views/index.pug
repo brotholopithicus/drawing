@@ -1,0 +1,18 @@
+extends layout
+
+block stylesheets
+
+block content
+  canvas.whiteboard
+  .toolbar
+    .colors
+      .color.black
+      .color.red
+      .color.green
+      .color.blue
+      .color.yellow
+    button#clear Clear
+
+block scripts
+  script(src='/socket.io/socket.io.js')
+  script(src='/js/app.js')
