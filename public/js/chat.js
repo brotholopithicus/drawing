@@ -63,6 +63,13 @@ function Chat() {
     this.socket.emit('new message', message);
   }
   this.addChatMessage = (data, options = { fade: true, prepend: false }) => {
+    const typingMessages = this.getTypingMessages(data);
+    if (typingMessages.length !== 0) {
+      typingMessages.forEach(msg => {
+        let parentNode = msg.parentNode;
+        parentNode.removeChild(msg);
+      });
+    }
     const username = document.createElement('span');
     username.classList.add('username');
     username.style.color = this.getUsernameColor(data.username);
@@ -98,24 +105,36 @@ function Chat() {
     this.addChatMessage(data);
   }
   this.removeChatTyping = (data) => {
-    let el = this.getTypingMessages(data)[0];
-    let parentNode = el.parentNode;
-    parentNode.removeChild(el);
+    const arr = this.getTypingMessages(data);
+    arr.forEach(el => {
+      el.classList.add('fade');
+      setTimeout(() => {
+        let parentNode = el.parentNode;
+        if (parentNode) {
+          parentNode.removeChild(el);
+        }
+      }, 2000);
+    })
   }
   this.getTypingMessages = (data) => {
-    return Array.from(document.querySelectorAll('.typing')).filter(el => el.dataset.username === data.username);
+    let arr = this.messages.querySelectorAll('.typing');
+    let result = [];
+    arr.forEach(el => {
+      if (el.dataset.username === data.username) {
+        result.push(el);
+      }
+    });
+    return result;
   }
   this.updateTyping = () => {
-    if (!this.typing) {
-      this.typing = true;
-      this.socket.emit('typing');
-    }
+    if (this.typing) return;
+    this.typing = true;
+    this.socket.emit('typing');
     let lastTypingTime = (new Date()).getTime();
-
     setTimeout(() => {
       let typingTimer = (new Date()).getTime();
       let timeDiff = typingTimer - lastTypingTime;
-      if (timeDiff >= this.config.typing_timer_length && this.typing) {
+      if ((timeDiff >= this.config.typing_timer_length) && this.typing) {
         this.socket.emit('stop typing');
         this.typing = false;
       }

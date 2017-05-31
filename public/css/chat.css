@@ -145,3 +145,13 @@ ul {
   right: 0;
   width: 100%;
 }
+
+.fade {
+  animation: fade 2s ease;
+}
+
+@keyframes fade {
+  to {
+    opacity: 0;
+  }
+}
