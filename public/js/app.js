@@ -4,15 +4,14 @@ function App() {
     this.canvas = document.querySelector('.whiteboard');
     this.colors = document.querySelectorAll('.color');
     this.clearButton = document.querySelector('button#clear');
-
     this.ctx = this.canvas.getContext('2d');
-
-    this.current = {
-      color: 'black',
-    }
+    this.current = { color: 'black' }
     this.drawing = false;
     ['mousedown', 'mouseup', 'mouseout', 'mousemove'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 10)));
-    this.colors.forEach(color => color.addEventListener('click', this.updateColor));
+    this.colors.forEach(color => {
+      color.style.backgroundColor = color.dataset.color;
+      color.addEventListener('click', this.updateColor);
+    });
     this.clearButton.addEventListener('click', this.clearEventHandler);
     this.socket.on('drawing', this.onDrawingEvent);
     this.socket.on('history', this.onCanvasHistory);
@@ -35,7 +34,7 @@ function App() {
     });
   }
   this.updateColor = (e) => {
-    this.current.color = e.target.className.split(' ')[1];
+    this.current.color = e.target.dataset.color;
   }
   this.drawLine = (x0, y0, x1, y1, color, emit) => {
     this.ctx.beginPath();
@@ -45,9 +44,8 @@ function App() {
     this.ctx.lineWidth = 2;
     this.ctx.stroke();
     this.ctx.closePath();
-
     if (!emit) return;
-    [w, h] = [this.canvas.width, this.canvas.height]
+    const { w, h } = this.getCanvasDimensions();
     this.socket.emit('drawing', {
       x0: x0 / w,
       y0: y0 / h,
@@ -57,7 +55,6 @@ function App() {
     });
   }
   this.mouseEventHandler = (e) => {
-    console.log(e.type);
     switch (e.type) {
       case 'mousedown':
         this.drawing = true;
@@ -78,7 +75,7 @@ function App() {
     }
   }
   this.onDrawingEvent = (data) => {
-    [w, h] = [this.canvas.width, this.canvas.height];
+    const { w, h } = this.getCanvasDimensions();
     this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
   }
   this.onResize = () => {
@@ -96,6 +93,7 @@ function App() {
       }
     }
   }
+  this.getCanvasDimensions = () => ({ w: this.canvas.width, h: this.canvas.height })
 }
 
 let app = new App();
