@@ -1,0 +1,19 @@
+extends layout
+
+block stylesheets
+  link(rel='stylesheet', href='/css/chat.css')
+
+block content
+  ul.pages
+    li.chat.page
+      .chatArea
+        ul.messages
+      input.messageInput(placeholder='Type here...')
+    li.login.page
+      .form
+        h3.title What's your nickname?
+        input.usernameInput(type='text', maxlength='14')
+
+block scripts
+  script(src='/socket.io/socket.io.js')
+  script(src='/js/chat.js')
