@@ -1,131 +1,69 @@
 function App() {
   this.config = {
     colors: [
-      '#001F3F',
-      '#0074D9',
-      '#7FDBFF',
-      '#39CCCC',
-      '#3D9970',
-      '#2ECC40',
-      '#01FF70',
-      '#FFDC00',
-      '#FF851B',
-      '#FF4136',
-      '#F012BE',
-      '#B10DC9',
-      '#85144B',
-      '#AAAAAA',
-      '#111111',
+      '#001F3F', '#0074D9', '#7FDBFF',
+      '#39CCCC', '#3D9970', '#2ECC40',
+      '#01FF70', '#FFDC00', '#FF851B',
+      '#FF4136', '#F012BE', '#B10DC9',
+      '#85144B', '#AAAAAA', '#111111',
     ]
   }
   this.initialize = (element) => {
     const { canvas, toolbar } = this.createDOM();
-    element.appendChild(canvas);
-    element.appendChild(toolbar);
+    this.element = element;
+    this.element.appendChild(canvas);
+    this.element.appendChild(toolbar);
 
     this.socket = io();
+
     this.canvas = document.querySelector('.whiteboard');
     this.colors = document.querySelectorAll('.color');
+    this.lineWidthRange = document.querySelector('.line-width');
+    this.lineWidthDisplay = document.querySelector('.circle');
     this.clearButton = document.querySelector('button#clear');
+
     this.ctx = this.canvas.getContext('2d');
-    this.current = { color: 'black' }
+    this.current = { x: 0, y: 0, color: '#111', size: 25 };
+
     this.drawing = false;
-    ['mousedown', 'mouseup', 'mouseout', 'mousemove'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 10)));
+
+    ['mousedown', 'mouseup', 'mouseout', 'mousemove'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 0)));
+
     this.colors.forEach(color => {
       color.style.backgroundColor = color.dataset.color;
       color.addEventListener('click', this.updateColor);
     });
+
+    this.lineWidthRange.addEventListener('input', this.updateLineWidth);
     this.clearButton.addEventListener('click', this.clearEventHandler);
+
     this.socket.on('drawing', this.onDrawingEvent);
     this.socket.on('history', this.onCanvasHistory);
     this.socket.on('clear', this.clearCanvas);
+
     window.addEventListener('resize', this.onResize);
     this.onResize();
   }
-  this.clearCanvas = (emit) => {
-    this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    if (!emit) return;
-    this.socket.emit('clear');
-  }
-  this.clearEventHandler = (e) => {
-    this.clearCanvas(true);
-  }
-  this.onCanvasHistory = (history) => {
-    history.forEach(item => {
-      this.onDrawingEvent(item);
-    });
-  }
-  this.updateColor = (e) => {
-    this.current.color = e.target.dataset.color;
-  }
-  this.drawLine = (x0, y0, x1, y1, color, emit) => {
-    this.ctx.beginPath();
-    this.ctx.moveTo(x0, y0);
-    this.ctx.lineTo(x1, y1);
-    this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = 2;
-    this.ctx.stroke();
-    this.ctx.closePath();
-    if (!emit) return;
-    const { w, h } = this.getCanvasDimensions();
-    this.socket.emit('drawing', {
-      x0: x0 / w,
-      y0: y0 / h,
-      x1: x1 / w,
-      y1: y1 / h,
-      color
-    });
-  }
-  this.mouseEventHandler = (e) => {
-    switch (e.type) {
-      case 'mousedown':
-        this.drawing = true;
-        this.current.x = e.clientX;
-        this.current.y = e.clientY;
-        break;
-      case 'mousemove':
-        if (!this.drawing) return;
-        this.drawLine(this.current.x, this.current.y, e.clientX, e.clientY, this.current.color, true);
-        this.current.x = e.clientX;
-        this.current.y = e.clientY;
-        break;
-      default: // mouseup and mouseout
-        if (!this.drawing) return;
-        this.drawing = false;
-        this.drawLine(this.current.x, this.current.y, e.clientX, e.clientY, this.current.color, true);
-        break;
-    }
-  }
-  this.onDrawingEvent = (data) => {
-    const { w, h } = this.getCanvasDimensions();
-    this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
-  }
-  this.onResize = () => {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    this.socket.emit('resize');
-  }
-  this.throttle = (callback, delay) => {
-    let previousCall = new Date().getTime();
-    return function() {
-      let time = new Date().getTime();
-      if ((time - previousCall) >= delay) {
-        previousCall = time;
-        callback.apply(null, arguments);
-      }
-    }
-  }
-  this.getCanvasDimensions = () => ({ w: this.canvas.width, h: this.canvas.height })
   this.createDOM = () => {
     const canvas = this.createElement('canvas', { classes: ['whiteboard'] });
     const toolbar = this.createElement('div', { classes: ['toolbar'] });
+    const lineWidthContainer = this.createElement('div', { classes: ['line-width-container'] });
+    const lineWidthRange = this.createElement('input', { classes: ['line-width'], attribs: [{ name: 'type', value: 'range' }, { name: 'min', value: 5 }, { name: 'max', value: 50 }, { name: 'step', value: 1 }, { name: 'value', value: 25 }] });
+    const circleContainer = this.createElement('div', { classes: ['circle-container'] });
+    const circle = this.createElement('span', { classes: ['circle'] });
+    circle.style.width = lineWidthRange.value + 'px';
+    circle.style.height = lineWidthRange.value + 'px';
+    circleContainer.appendChild(circle);
+    lineWidthContainer.appendChild(circleContainer);
+    lineWidthContainer.appendChild(lineWidthRange);
     const colors = this.createElement('div', { classes: ['colors'] });
     this.config.colors.forEach(color => {
       let el = this.createElement('div', { classes: ['color'], attribs: [{ name: 'data-color', value: color }] });
+      if (color === '#111111') el.classList.add('active');
       colors.appendChild(el);
     });
     const clearButton = this.createElement('button', { id: 'clear', text: 'Clear' });
+    toolbar.appendChild(lineWidthContainer);
     toolbar.appendChild(colors);
     toolbar.appendChild(clearButton);
     return {
@@ -151,6 +89,102 @@ function App() {
     }
     return el;
   }
+  this.updateLineWidth = (event) => {
+    let size = event.target.value;
+    this.lineWidthDisplay.style.width = size + 'px';
+    this.lineWidthDisplay.style.height = size + 'px';
+    this.current.size = size;
+  }
+  this.clearCanvas = (emit) => {
+    this.ctx.fillStyle = '#fff';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    if (!emit) return;
+    this.socket.emit('clear');
+  }
+  this.clearEventHandler = (e) => {
+    this.clearCanvas(true);
+  }
+  this.onCanvasHistory = (history) => {
+    history.forEach(item => {
+      this.onDrawingEvent(item);
+    });
+  }
+  this.updateColor = (e) => {
+    document.querySelector('.color.active').classList.remove('active');
+    e.target.classList.add('active');
+    this.current.color = e.target.dataset.color;
+    this.lineWidthDisplay.style.backgroundColor = e.target.dataset.color;
+  }
+  this.getMousePos = (e) => {
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    }
+  }
+  this.drawLine = (x0, y0, x1, y1, color, size, emit) => {
+    this.ctx.beginPath();
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+    this.ctx.lineWidth = size;
+    this.ctx.strokeStyle = color;
+    this.ctx.moveTo(x0, y0);
+    this.ctx.lineTo(x1, y1);
+    this.ctx.stroke();
+    this.ctx.closePath();
+
+    if (!emit) return;
+    const { w, h } = this.getCanvasDimensions();
+    this.socket.emit('drawing', {
+      x0: x0 / w,
+      y0: y0 / h,
+      x1: x1 / w,
+      y1: y1 / h,
+      color,
+      size
+    });
+  }
+  this.mouseEventHandler = (e) => {
+    const coords = this.getMousePos(e);
+    switch (e.type) {
+      case 'mousedown':
+        this.drawing = true;
+        this.current.x = coords.x;
+        this.current.y = coords.y;
+        break;
+      case 'mousemove':
+        if (!this.drawing) return;
+        this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
+        this.current.x = coords.x;
+        this.current.y = coords.y;
+        break;
+      default: // mouseup and mouseout
+        if (!this.drawing) return;
+        this.drawing = false;
+        this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
+        break;
+    }
+  }
+  this.onDrawingEvent = (data) => {
+    const { w, h } = this.getCanvasDimensions();
+    this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color, data.size);
+  }
+  this.onResize = () => {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.socket.emit('resize');
+  }
+  this.throttle = (callback, delay) => {
+    let previousCall = new Date().getTime();
+    return function() {
+      let time = new Date().getTime();
+      if ((time - previousCall) >= delay) {
+        previousCall = time;
+        callback.apply(null, arguments);
+      }
+    }
+  }
+  this.getCanvasDimensions = () => ({ w: this.canvas.width, h: this.canvas.height })
 }
 
 const drawContainer = document.querySelector('.draw-container');
@@ -166,8 +200,8 @@ function Chat() {
     ]
   }
   this.initialize = (element) => {
-
-    element.appendChild(this.createDOM());
+    this.element = element;
+    this.element.appendChild(this.createDOM());
 
     this.usernameInput = document.querySelector('.usernameInput');
     this.messages = document.querySelector('.messages');
@@ -176,11 +210,14 @@ function Chat() {
     this.chatPage = document.querySelector('.chat.page');
 
     this.participants = document.querySelector('#numUsers');
+    this.usernameInput.value = localStorage.getItem('username') ?
+      localStorage.getItem('username') : '';
     this.currentInput = this.usernameInput;
     this.currentInput.focus();
 
-    this.socket = io('/chat');
+    this.socket = io();
     this.addSocketListeners();
+
     window.addEventListener('keydown', (event) => {
       if (!(event.ctrlKey || event.metaKey || event.altKey)) {
         this.currentInput.focus();
@@ -240,9 +277,12 @@ function Chat() {
   }
   this.setUsername = () => {
     this.username = this.usernameInput.value.trim();
+    localStorage.setItem('username', this.username);
     let chatToggle = document.querySelector('#chatToggle');
     chatToggle.disabled = false;
     chatToggle.classList.add('flash');
+    chatToggle.textContent = 'Open Chat';
+    this.element.classList.add('closed');
     this.loginPage.style.display = 'none';
     this.chatPage.style.display = 'block';
     this.currentInput = this.messageInput;
