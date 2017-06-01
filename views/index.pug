@@ -1,19 +1,18 @@
 extends layout
 
 block stylesheets
-  link(rel='stylesheet', href='/css/style.css')
-    
+  link(rel='stylesheet', href='/css/combo.css')
+
 block content
-  canvas.whiteboard
-  .toolbar
-    .colors
-      .color(data-color='black')
-      .color(data-color='red')
-      .color(data-color='green')
-      .color(data-color='blue')
-      .color(data-color='yellow')
-    button#clear Clear
+  .main-container
+    .draw-container
+    .chat-container
+  footer
+    button#chatToggle.disabled(disabled) Close Chat
+    button.participants
+      span#numUsers 0
+      | &nbsp;🤖
 
 block scripts
   script(src='/socket.io/socket.io.js')
-  script(src='/js/app.js')
+  script(src='/js/combo.js')

@@ -1,5 +1,16 @@
 function App() {
-  this.initialize = () => {
+  this.config = {
+    colors: [
+      '#e21400', '#91580f', '#f8a700', '#f78b00',
+      '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
+      '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
+    ]
+  }
+  this.initialize = (element) => {
+    const { canvas, toolbar } = this.createDOM();
+    element.appendChild(canvas);
+    element.appendChild(toolbar);
+
     this.socket = io();
     this.canvas = document.querySelector('.whiteboard');
     this.colors = document.querySelectorAll('.color');
@@ -94,7 +105,42 @@ function App() {
     }
   }
   this.getCanvasDimensions = () => ({ w: this.canvas.width, h: this.canvas.height })
+  this.createDOM = () => {
+    const canvas = this.createElement('canvas', { classes: ['whiteboard'] });
+    const toolbar = this.createElement('div', { classes: ['toolbar'] });
+    const colors = this.createElement('div', { classes: ['colors'] });
+    this.config.colors.forEach(color => {
+      let el = this.createElement('div', { classes: ['color'], attribs: [{ name: 'data-color', value: color }] });
+      colors.appendChild(el);
+    });
+    const clearButton = this.createElement('button', { id: 'clear', text: 'Clear' });
+    toolbar.appendChild(colors);
+    toolbar.appendChild(clearButton);
+    return {
+      canvas,
+      toolbar
+    }
+  }
+  this.createElement = (tag, options) => {
+    const el = document.createElement(tag);
+    if (options.id) {
+      el.id = options.id;
+    }
+    if (options.classes) {
+      options.classes.forEach(className => el.classList.add(className));
+    }
+    if (options.attribs) {
+      options.attribs.forEach(attrib => {
+        el.setAttribute(attrib.name, attrib.value);
+      });
+    }
+    if (options.text) {
+      el.textContent = options.text;
+    }
+    return el;
+  }
 }
 
+const drawContainer = document.querySelector('.draw-container');
 let app = new App();
-app.initialize();
+app.initialize(drawContainer);

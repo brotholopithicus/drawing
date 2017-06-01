@@ -28,14 +28,6 @@ chat.on('connection', (socket) => {
     socket.emit('login', { numUsers });
     socket.broadcast.emit('user joined', { username, numUsers })
   });
-  socket.on('typing', () => {
-    socket.broadcast.emit('typing', {
-      username: socket.username
-    });
-  });
-  socket.on('stop typing', () => {
-    socket.broadcast.emit('stop typing', { username: socket.username });
-  });
   socket.on('disconnect', () => {
     if (socket.username) {
       numUsers--;

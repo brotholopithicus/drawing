@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "DEBUG=drawing:* nodemon ./bin/www"
+    "dev": "DEBUG=drawing:* nodemon ./bin/www --ignore 'public/js/*.js'"
   },
   "dependencies": {
     "body-parser": "~1.17.1",

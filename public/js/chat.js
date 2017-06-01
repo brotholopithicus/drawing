@@ -1,14 +1,15 @@
 function Chat() {
   this.config = {
-    fade_time: 150,
-    typing_timer_length: 400,
     colors: [
       '#e21400', '#91580f', '#f8a700', '#f78b00',
       '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
       '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
     ]
   }
-  this.initialize = () => {
+  this.initialize = (element) => {
+
+    element.appendChild(this.createDOM());
+
     this.usernameInput = document.querySelector('.usernameInput');
     this.messages = document.querySelector('.messages');
     this.messageInput = document.querySelector('.messageInput');
@@ -20,8 +21,6 @@ function Chat() {
 
     this.socket = io('/chat');
     this.addSocketListeners();
-    this.typing = false;
-    this.messageInput.addEventListener('keydown', () => this.updateTyping());
     window.addEventListener('keydown', (event) => {
       if (!(event.ctrlKey || event.metaKey || event.altKey)) {
         this.currentInput.focus();
@@ -29,13 +28,49 @@ function Chat() {
       if (event.keyCode === 13) {
         if (this.username) {
           this.sendMessage();
-          this.socket.emit('stop styping');
-          this.typing = false;
         } else {
           this.setUsername();
         }
       }
     });
+  }
+  this.createDOM = () => {
+    const pages = this.createElement('ul', { classes: ['pages'] });
+    const chatPage = this.createElement('li', { classes: ['chat', 'page'] });
+    const chatArea = this.createElement('div', { classes: ['chatArea'] });
+    const messages = this.createElement('ul', { classes: ['messages'] });
+    const messageInput = this.createElement('input', { classes: ['messageInput'] });
+    const loginPage = this.createElement('li', { classes: ['login', 'page'] });
+    const form = this.createElement('div', { classes: ['form'] });
+    const title = this.createElement('h3', { classes: ['title'], text: `What's your name?` });
+    const usernameInput = this.createElement('input', { classes: ['usernameInput'], attribs: [{ name: 'type', value: 'text' }, { name: 'maxLength', value: '14' }] });
+
+    chatArea.appendChild(messages);
+    chatPage.appendChild(chatArea);
+    chatPage.appendChild(messageInput);
+    pages.appendChild(chatPage);
+
+    form.appendChild(title);
+    form.appendChild(usernameInput);
+    loginPage.appendChild(form);
+    pages.appendChild(loginPage);
+
+    return pages;
+  }
+  this.createElement = (tag, options) => {
+    const el = document.createElement(tag);
+    if (options.classes) {
+      options.classes.forEach(className => el.classList.add(className));
+    }
+    if (options.attribs) {
+      options.attribs.forEach(attrib => {
+        el.setAttribute(attrib.name, attrib.value);
+      });
+    }
+    if (options.text) {
+      el.textContent = options.text;
+    }
+    return el;
   }
   this.addParticipantsMessage = (data) => {
     let message = `there are ${data.numUsers} participant(s)`;
@@ -63,13 +98,6 @@ function Chat() {
     this.socket.emit('new message', message);
   }
   this.addChatMessage = (data, options = { fade: true, prepend: false }) => {
-    const typingMessages = this.getTypingMessages(data);
-    if (typingMessages.length !== 0) {
-      typingMessages.forEach(msg => {
-        let parentNode = msg.parentNode;
-        parentNode.removeChild(msg);
-      });
-    }
     const username = document.createElement('span');
     username.classList.add('username');
     username.style.color = this.getUsernameColor(data.username);
@@ -79,7 +107,6 @@ function Chat() {
     body.textContent = data.message;
     const msg = document.createElement('li');
     msg.classList.add('message');
-    if (data.typing) msg.classList.add('typing');
     msg.dataset.username = data.username;
 
     msg.appendChild(username);
@@ -99,47 +126,6 @@ function Chat() {
     let index = Math.abs(hash % this.config.colors.length);
     return this.config.colors[index];
   }
-  this.addChatTyping = (data) => {
-    data.typing = true;
-    data.message = 'is typing';
-    this.addChatMessage(data);
-  }
-  this.removeChatTyping = (data) => {
-    const arr = this.getTypingMessages(data);
-    arr.forEach(el => {
-      el.classList.add('fade');
-      setTimeout(() => {
-        let parentNode = el.parentNode;
-        if (parentNode) {
-          parentNode.removeChild(el);
-        }
-      }, 2000);
-    })
-  }
-  this.getTypingMessages = (data) => {
-    let arr = this.messages.querySelectorAll('.typing');
-    let result = [];
-    arr.forEach(el => {
-      if (el.dataset.username === data.username) {
-        result.push(el);
-      }
-    });
-    return result;
-  }
-  this.updateTyping = () => {
-    if (this.typing) return;
-    this.typing = true;
-    this.socket.emit('typing');
-    let lastTypingTime = (new Date()).getTime();
-    setTimeout(() => {
-      let typingTimer = (new Date()).getTime();
-      let timeDiff = typingTimer - lastTypingTime;
-      if ((timeDiff >= this.config.typing_timer_length) && this.typing) {
-        this.socket.emit('stop typing');
-        this.typing = false;
-      }
-    }, this.config.typing_timer_length);
-  }
   this.addSocketListeners = () => {
     // new message
     this.socket.on('new message', (data) => this.addChatMessage(data));
@@ -157,14 +143,11 @@ function Chat() {
       this.log(data.username + ' left');
       this.addParticipantsMessage(data);
     });
-    // typing
-    this.socket.on('typing', (data) => this.addChatTyping(data));
-    // stop typing
-    this.socket.on('stop typing', (data) => this.removeChatTyping(data));
     // disconnect
     this.socket.on('disconnect', () => this.log('You have been disconnected.'));
   }
 }
 
+const chatContainer = document.querySelector('.chat-container');
 let chat = new Chat();
-chat.initialize();
+chat.initialize(chatContainer);

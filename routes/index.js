@@ -9,4 +9,8 @@ router.get('/chat', (req, res, next) => {
   res.render('chat', { title: 'chat' });
 });
 
+router.get('/draw', (req, res, next) => {
+  res.render('draw', { title: 'Combo' });
+});
+
 module.exports = router;
