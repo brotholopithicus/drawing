@@ -220,6 +220,10 @@ function Chat() {
     this.addSocketListeners();
 
     window.addEventListener('keydown', (event) => {
+      if (this.element.classList.contains('closed')) return;
+
+      if (this.username && event.keyCode === 27) this.element.classList.add('closed');
+
       if (!(event.ctrlKey || event.metaKey || event.altKey)) {
         this.currentInput.focus();
       }
@@ -287,7 +291,6 @@ function Chat() {
     this.loginPage.style.display = 'none';
     this.chatPage.style.display = 'block';
     this.currentInput = this.messageInput;
-    this.currentInput.focus();
 
     this.socket.emit('add user', this.username);
   }
