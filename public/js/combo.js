@@ -9,9 +9,10 @@ function App() {
     //   '#FFFFFF'
     // ]
     colors: [
-      '#000000', '#ffffff', '#ff3b3b',
-      '#f7821c', '#ffdc00', '#2ee643',
-      '#007fee', '#8000ff', '#b40dcc'
+      '#000000', '#ffffff', '#5c3e28',
+      '#ff3b3b', '#f7821c', '#ffdc00',
+      '#2ee643', '#007fee', '#B10DC9',
+      '#F012BE'
     ]
   }
   this.initialize = (element) => {
