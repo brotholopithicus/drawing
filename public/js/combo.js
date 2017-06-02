@@ -23,7 +23,7 @@ function App() {
     this.element.appendChild(canvas);
     this.element.appendChild(toolbar);
 
-    this.socket = io('https://jamespjarvis.com:8005');
+    this.socket = io('https://jamespjarvis.com');
 
     this.canvas = document.querySelector('.whiteboard');
     this.colors = document.querySelectorAll('.color');
