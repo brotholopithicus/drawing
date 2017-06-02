@@ -35,15 +35,17 @@ function App() {
 
     this.drawing = false;
 
-    ['mousedown', 'mouseup', 'mouseout', 'mousemove'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 0)));
+    ['mousedown', 'mouseup', 'mouseout', 'mousemove', 'touchstart', 'touchmove', 'touchcancel', 'touchend'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 0)));
 
     this.colors.forEach(color => {
       color.style.backgroundColor = color.dataset.color;
       color.addEventListener('click', this.updateColor);
+      color.addEventListener('touchstart', this.updateColor);
     });
 
     this.lineWidthRange.addEventListener('input', this.updateLineWidth);
     this.clearButton.addEventListener('click', this.clearEventHandler);
+    this.clearButton.addEventListener('touchstart', this.clearEventHandler);
 
     this.socket.on('drawing', this.onDrawingEvent);
     this.socket.on('history', this.onCanvasHistory);
@@ -155,12 +157,12 @@ function App() {
   this.mouseEventHandler = (e) => {
     const coords = this.getMousePos(e);
     switch (e.type) {
-      case 'mousedown':
+      case 'mousedown' || 'touchstart':
         this.drawing = true;
         this.current.x = coords.x;
         this.current.y = coords.y;
         break;
-      case 'mousemove':
+      case 'mousemove' || 'touchmove':
         if (!this.drawing) return;
         this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
         this.current.x = coords.x;
@@ -219,6 +221,7 @@ function Chat() {
     this.chatToggle = document.querySelector('#chatToggle');
 
     this.chatToggle.addEventListener('click', this.onChatToggle);
+    this.chatToggle.addEventListener('touchstart', this.onChatToggle);
 
     this.participants = document.querySelector('#numUsers');
 
