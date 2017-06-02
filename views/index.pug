@@ -1,7 +1,6 @@
 extends layout
 
 block stylesheets
-  link(rel='stylesheet', href='/css/combo.min.css')
 
 block content
   .main-container
@@ -14,5 +13,5 @@ block content
     button#chatToggle.disabled(disabled)
 
 block scripts
-  script(src='/js/socket.io.js')
-  script(src='/js/combo.min.js')
+  script(src='/socket.io/socket.io.js')
+  script(src='/dist/bundle.js')

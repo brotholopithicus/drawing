@@ -3,8 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=drawing:* node ./bin/www",
-    "dev": "DEBUG=drawing:* nodemon ./bin/www --ignore 'public/js/*.js'"
+    "start": "node ./bin/www",
+    "dev": "DEBUG=drawing:* node ./bin/www",
+    "dev:nodemon": "DEBUG=drawing:* nodemon ./bin/www --ignore 'public/js/*.js'",
+    "build": "webpack --progress --colors",
+    "build:prod": "webpack -p",
+    "watch": "webpack --watch"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
@@ -19,6 +23,17 @@
     "socket.io": "^2.0.1"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "autoprefixer": "^7.1.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "babili-webpack-plugin": "^0.1.1",
+    "css-loader": "^0.28.4",
+    "cssnano": "^3.10.0",
+    "file-loader": "^0.11.1",
+    "nodemon": "^1.11.0",
+    "postcss-loader": "^2.0.5",
+    "style-loader": "^0.18.1",
+    "url-loader": "^0.5.8",
+    "webpack": "^2.6.1"
   }
 }

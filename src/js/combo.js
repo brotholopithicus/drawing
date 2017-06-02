@@ -35,17 +35,19 @@ function App() {
 
     this.drawing = false;
 
-    ['mousedown', 'mouseup', 'mouseout', 'mousemove', 'touchstart', 'touchmove', 'touchcancel', 'touchend'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 0)));
+    // mouse event listeners
+    ['mousedown', 'mouseup', 'mouseout', 'mousemove'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.mouseEventHandler, 0)));
+
+    // touch event listeners
+    ['touchstart', 'touchmove', 'touchcancel', 'touchend', 'touchcancel'].forEach(evt => this.canvas.addEventListener(evt, this.throttle(this.touchEventHandler, 0)));
 
     this.colors.forEach(color => {
       color.style.backgroundColor = color.dataset.color;
       color.addEventListener('click', this.updateColor);
-      color.addEventListener('touchstart', this.updateColor);
     });
 
     this.lineWidthRange.addEventListener('input', this.updateLineWidth);
     this.clearButton.addEventListener('click', this.clearEventHandler);
-    this.clearButton.addEventListener('touchstart', this.clearEventHandler);
 
     this.socket.on('drawing', this.onDrawingEvent);
     this.socket.on('history', this.onCanvasHistory);
@@ -157,18 +159,48 @@ function App() {
   this.mouseEventHandler = (e) => {
     const coords = this.getMousePos(e);
     switch (e.type) {
-      case 'mousedown' || 'touchstart':
+      case 'mousedown':
         this.drawing = true;
         this.current.x = coords.x;
         this.current.y = coords.y;
         break;
-      case 'mousemove' || 'touchmove':
+      case 'mousemove':
         if (!this.drawing) return;
         this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
         this.current.x = coords.x;
         this.current.y = coords.y;
         break;
       default: // mouseup and mouseout
+        if (!this.drawing) return;
+        this.drawing = false;
+        this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
+        break;
+    }
+  }
+  this.getTouchPos = (touch) => {
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    }
+  }
+  this.touchEventHandler = (e) => {
+    e.preventDefault();
+    if (e.targetTouches.length !== 1) return;
+    const coords = this.getTouchPos(e.targetTouches[0]);
+    switch (e.type) {
+      case 'touchstart':
+        this.drawing = true;
+        this.current.x = coords.x;
+        this.current.y = coords.y;
+        break;
+      case 'touchmove':
+        if (!this.drawing) return;
+        this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
+        this.current.x = coords.x;
+        this.current.y = coords.y;
+        break;
+      default:
         if (!this.drawing) return;
         this.drawing = false;
         this.drawLine(this.current.x, this.current.y, coords.x, coords.y, this.current.color, this.current.size, true);
@@ -221,7 +253,6 @@ function Chat() {
     this.chatToggle = document.querySelector('#chatToggle');
 
     this.chatToggle.addEventListener('click', this.onChatToggle);
-    this.chatToggle.addEventListener('touchstart', this.onChatToggle);
 
     this.participants = document.querySelector('#numUsers');
 
