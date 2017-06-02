@@ -49,7 +49,7 @@ function App() {
     const canvas = this.createElement('canvas', { classes: ['whiteboard'] });
     const toolbar = this.createElement('div', { classes: ['toolbar'] });
     const lineWidthContainer = this.createElement('div', { classes: ['line-width-container'] });
-    const lineWidthRange = this.createElement('input', { classes: ['line-width'], attribs: [{ name: 'type', value: 'range' }, { name: 'min', value: 5 }, { name: 'max', value: 50 }, { name: 'step', value: 1 }, { name: 'value', value: 25 }] });
+    const lineWidthRange = this.createElement('input', { classes: ['line-width'], attribs: [{ name: 'type', value: 'range' }, { name: 'min', value: 1 }, { name: 'max', value: 50 }, { name: 'step', value: 1 }, { name: 'value', value: 25 }] });
     const circleContainer = this.createElement('div', { classes: ['circle-container'] });
     const circle = this.createElement('span', { classes: ['circle'] });
     circle.style.width = lineWidthRange.value + 'px';
@@ -209,12 +209,19 @@ function Chat() {
     this.messageInput = document.querySelector('.messageInput');
     this.loginPage = document.querySelector('.login.page');
     this.chatPage = document.querySelector('.chat.page');
+    this.chatToggle = document.querySelector('#chatToggle');
+
+    this.chatToggle.addEventListener('click', this.onChatToggle);
 
     this.participants = document.querySelector('#numUsers');
+
     this.usernameInput.value = localStorage.getItem('username') ?
       localStorage.getItem('username') : '';
+
     this.currentInput = this.usernameInput;
     this.currentInput.focus();
+
+    this.unreadMessages = 0;
 
     this.socket = io();
     this.addSocketListeners();
@@ -222,7 +229,9 @@ function Chat() {
     window.addEventListener('keydown', (event) => {
       if (this.element.classList.contains('closed')) return;
 
-      if (this.username && event.keyCode === 27) this.element.classList.add('closed');
+      if (this.username && event.keyCode === 27) {
+        this.onChatToggle();
+      }
 
       if (!(event.ctrlKey || event.metaKey || event.altKey)) {
         this.currentInput.focus();
@@ -235,6 +244,16 @@ function Chat() {
         }
       }
     });
+  }
+  this.onChatToggle = (e) => {
+    this.flash(this.chatToggle, 'green');
+    this.element.classList.toggle('closed');
+    if (this.element.classList.contains('closed')) {
+      this.chatToggle.textContent = `Open Chat (${this.unreadMessages})`;
+    } else {
+      this.chatToggle.textContent = `Close Chat`;
+      this.unreadMessages = 0;
+    }
   }
   this.createDOM = () => {
     const pages = this.createElement('ul', { classes: ['pages'] });
@@ -283,10 +302,10 @@ function Chat() {
   this.setUsername = () => {
     this.username = this.usernameInput.value.trim();
     localStorage.setItem('username', this.username);
-    let chatToggle = document.querySelector('#chatToggle');
-    chatToggle.disabled = false;
-    chatToggle.classList.add('flash');
-    chatToggle.textContent = 'Open Chat';
+    this.chatToggle = document.querySelector('#chatToggle');
+    this.chatToggle.disabled = false;
+    this.flash(this.chatToggle, 'green');
+    this.chatToggle.textContent = 'Open Chat (0)';
     this.element.classList.add('closed');
     this.loginPage.style.display = 'none';
     this.chatPage.style.display = 'block';
@@ -321,6 +340,12 @@ function Chat() {
     this.messages.appendChild(el);
     this.messages.scrollTop = this.messages.scrollHeight;
   }
+  this.flash = (element, color) => {
+    element.classList.add('flash', color);
+    setTimeout(() => {
+      element.classList.remove('flash', color);
+    }, 1000);
+  }
   this.getUsernameColor = (username) => {
     let hash = 7;
     for (let i = 0; i < username.length; i++) {
@@ -329,9 +354,26 @@ function Chat() {
     let index = Math.abs(hash % this.config.colors.length);
     return this.config.colors[index];
   }
+  this.updateUnreadMessages = () => {
+    if (this.element.classList.contains('closed')) {
+      this.unreadMessages++;
+      this.chatToggle.textContent = `Open Chat (${this.unreadMessages})`;
+      this.flash(this.chatToggle, 'blue');
+    }
+  }
   this.addSocketListeners = () => {
     // new message
-    this.socket.on('new message', (data) => this.addChatMessage(data));
+    this.socket.on('new message', (data) => {
+      this.addChatMessage(data);
+      this.updateUnreadMessages();
+    });
+    // chat history
+    this.socket.on('chatHistory', (data) => {
+      data.forEach(msgData => {
+        console.log(msgData);
+        this.addChatMessage(msgData);
+      });
+    });
     // user joined
     this.socket.on('user joined', (data) => {
       this.log(data.username + ' joined');
@@ -340,6 +382,7 @@ function Chat() {
     // login
     this.socket.on('login', (data) => {
       this.updateUserNum(data);
+      this.socket.emit('chatHistory');
     });
     // user left
     this.socket.on('user left', (data) => {
@@ -357,15 +400,3 @@ function Chat() {
 const chatContainer = document.querySelector('.chat-container');
 let chat = new Chat();
 chat.initialize(chatContainer);
-
-const chatToggle = document.querySelector('#chatToggle');
-chatToggle.addEventListener('click', onChatToggle);
-
-function onChatToggle(event) {
-  chatContainer.classList.toggle('closed');
-  if (chatContainer.classList.contains('closed')) {
-    chatToggle.textContent = 'Open Chat';
-  } else {
-    chatToggle.textContent = 'Close Chat';
-  }
-}

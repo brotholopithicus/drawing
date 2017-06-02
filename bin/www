@@ -42,8 +42,9 @@ io.on('connection', (socket) => {
   // chat
 
   socket.on('new message', (data) => {
-    socket.broadcast.emit('new message', { username: socket.username, message: data });
-    chatHistory.push(data);
+    const msgData = { username: socket.username, message: data };
+    socket.broadcast.emit('new message', msgData);
+    chatHistory.push(msgData);
   });
 
   socket.on('add user', (username) => {
@@ -51,6 +52,13 @@ io.on('connection', (socket) => {
     socket.username = username;
     socket.emit('login', { numUsers });
     socket.broadcast.emit('user joined', { username, numUsers });
+  });
+
+  socket.on('chatHistory', (data) => {
+    if (chatHistory.length > 10) {
+      chatHistory = chatHistory.slice(chatHistory.length - 10, chatHistory.length);
+    }
+    socket.emit('chatHistory', chatHistory);
   });
 
   socket.on('disconnect', () => {
