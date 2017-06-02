@@ -69,7 +69,7 @@ button:hover {
 }
 
 .line-width-container {
-  flex: 0 0 30%;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -78,13 +78,14 @@ button:hover {
 }
 
 input.line-width {
-  flex: 1 0 50%;
+  flex: 1;
   margin: 2rem;
 }
 
 .circle-container {
   height: 100%;
-  width: 100%;
+  min-width: 65px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -117,20 +118,25 @@ input.line-width {
 }
 
 button#clear {
-  background-color: #4f2cad;
+  background-color: #373737;
 }
 
 button#clear:hover {
-  background-color: #795bcc;
+  background-color: #555555;
 }
 
 footer {
   z-index: 1;
-  flex: 0 1 5vh;
+  flex: 0 0 5vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  font-size: 5vh;
+  font-size: 1em;
+  height: 5vh;
 }
 
 button#chatToggle {
@@ -144,6 +150,7 @@ button#chatToggle:hover {
 
 button#chatToggle:disabled {
   cursor: not-allowed;
+  opacity: 0.2;
 }
 
 button#chatToggle:disabled:hover {

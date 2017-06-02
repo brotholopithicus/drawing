@@ -1,15 +1,22 @@
 function App() {
   this.config = {
+    // colors: [
+    //   '#001F3F', '#0074D9', '#7FDBFF',
+    //   '#39CCCC', '#3D9970', '#2ECC40',
+    //   '#01FF70', '#FFDC00', '#FF851B',
+    //   '#FF4136', '#F012BE', '#B10DC9',
+    //   '#85144B', '#AAAAAA', '#111111',
+    //   '#FFFFFF'
+    // ]
     colors: [
-      '#001F3F', '#0074D9', '#7FDBFF',
-      '#39CCCC', '#3D9970', '#2ECC40',
-      '#01FF70', '#FFDC00', '#FF851B',
-      '#FF4136', '#F012BE', '#B10DC9',
-      '#85144B', '#AAAAAA', '#111111',
-      '#FFFFFF'
+      '#000000', '#ffffff', '#ff3b3b',
+      '#f7821c', '#ffdc00', '#2ee643',
+      '#007fee', '#8000ff', '#b40dcc'
     ]
   }
   this.initialize = (element) => {
+    this.current = { x: 0, y: 0, color: this.config.colors[0], size: 25 };
+
     const { canvas, toolbar } = this.createDOM();
     this.element = element;
     this.element.appendChild(canvas);
@@ -24,7 +31,6 @@ function App() {
     this.clearButton = document.querySelector('button#clear');
 
     this.ctx = this.canvas.getContext('2d');
-    this.current = { x: 0, y: 0, color: '#111', size: 25 };
 
     this.drawing = false;
 
@@ -49,24 +55,24 @@ function App() {
     const canvas = this.createElement('canvas', { classes: ['whiteboard'] });
     const toolbar = this.createElement('div', { classes: ['toolbar'] });
     const lineWidthContainer = this.createElement('div', { classes: ['line-width-container'] });
-    const lineWidthRange = this.createElement('input', { classes: ['line-width'], attribs: [{ name: 'type', value: 'range' }, { name: 'min', value: 1 }, { name: 'max', value: 50 }, { name: 'step', value: 1 }, { name: 'value', value: 25 }] });
+    const lineWidthRange = this.createElement('input', { classes: ['line-width'], attribs: [{ name: 'type', value: 'range' }, { name: 'min', value: 1 }, { name: 'max', value: 50 }, { name: 'step', value: 1 }, { name: 'value', value: this.current.size }] });
     const circleContainer = this.createElement('div', { classes: ['circle-container'] });
     const circle = this.createElement('span', { classes: ['circle'] });
     circle.style.width = lineWidthRange.value + 'px';
     circle.style.height = lineWidthRange.value + 'px';
+    lineWidthContainer.appendChild(lineWidthRange);
     circleContainer.appendChild(circle);
     lineWidthContainer.appendChild(circleContainer);
-    lineWidthContainer.appendChild(lineWidthRange);
     const colors = this.createElement('div', { classes: ['colors'] });
     this.config.colors.forEach(color => {
       let el = this.createElement('div', { classes: ['color'], attribs: [{ name: 'data-color', value: color }] });
-      if (color === '#111111') el.classList.add('active');
       colors.appendChild(el);
     });
+    colors.children[0].classList.add('active');
     const clearButton = this.createElement('button', { id: 'clear', text: 'Clear' });
+    toolbar.appendChild(clearButton);
     toolbar.appendChild(lineWidthContainer);
     toolbar.appendChild(colors);
-    toolbar.appendChild(clearButton);
     return {
       canvas,
       toolbar
