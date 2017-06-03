@@ -6,7 +6,7 @@ function App() {
       '#01FF70', '#FFDC00', '#FF851B',
       '#FF4136', '#F012BE', '#B10DC9',
       '#85144B', '#AAAAAA', '#111111',
-      '#FFFFFF'
+      '#FFFFFF', '#5c3e28'
     ]
     // colors: [
     //   '#000000', '#ffffff', '#5c3e28',
