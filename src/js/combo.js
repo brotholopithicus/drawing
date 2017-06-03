@@ -1,19 +1,19 @@
 function App() {
   this.config = {
-    // colors: [
-    //   '#001F3F', '#0074D9', '#7FDBFF',
-    //   '#39CCCC', '#3D9970', '#2ECC40',
-    //   '#01FF70', '#FFDC00', '#FF851B',
-    //   '#FF4136', '#F012BE', '#B10DC9',
-    //   '#85144B', '#AAAAAA', '#111111',
-    //   '#FFFFFF'
-    // ]
     colors: [
-      '#000000', '#ffffff', '#5c3e28',
-      '#ff3b3b', '#f7821c', '#ffdc00',
-      '#2ee643', '#007fee', '#B10DC9',
-      '#F012BE'
+      '#001F3F', '#0074D9', '#7FDBFF',
+      '#39CCCC', '#3D9970', '#2ECC40',
+      '#01FF70', '#FFDC00', '#FF851B',
+      '#FF4136', '#F012BE', '#B10DC9',
+      '#85144B', '#AAAAAA', '#111111',
+      '#FFFFFF'
     ]
+    // colors: [
+    //   '#000000', '#ffffff', '#5c3e28',
+    //   '#ff3b3b', '#f7821c', '#ffdc00',
+    //   '#2ee643', '#007fee', '#B10DC9',
+    //   '#F012BE'
+    // ]
   }
   this.initialize = (element) => {
     this.current = { x: 0, y: 0, color: this.config.colors[0], size: 25 };
