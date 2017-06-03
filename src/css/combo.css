@@ -37,6 +37,26 @@ canvas {
   cursor: url(../imgs/paintbrush_24x24.png) 0 0, auto;
 }
 
+a {
+  background-color: #3d3d3d;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.2s;
+  width: 5rem;
+}
+
+a:hover {
+  background-color: #636363;
+}
+
 button {
   color: #fff;
   background-color: #aaa;

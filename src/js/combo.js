@@ -30,6 +30,7 @@ function App() {
     this.lineWidthRange = document.querySelector('.line-width');
     this.lineWidthDisplay = document.querySelector('.circle');
     this.clearButton = document.querySelector('button#clear');
+    this.downloadButton = document.querySelector('a#download');
 
     this.ctx = this.canvas.getContext('2d');
 
@@ -48,7 +49,7 @@ function App() {
 
     this.lineWidthRange.addEventListener('input', this.updateLineWidth);
     this.clearButton.addEventListener('click', this.clearEventHandler);
-
+    this.downloadButton.addEventListener('click', this.downloadEventHandler);
     this.socket.on('drawing', this.onDrawingEvent);
     this.socket.on('history', this.onCanvasHistory);
     this.socket.on('clear', this.clearCanvas);
@@ -100,6 +101,10 @@ function App() {
       el.textContent = options.text;
     }
     return el;
+  }
+  this.downloadEventHandler = (event) => {
+    this.downloadButton.href = this.canvas.toDataURL();
+    this.downloadButton.download = `awesome_sauce.png`;
   }
   this.updateLineWidth = (event) => {
     let size = event.target.value;
