@@ -163,6 +163,7 @@ function App() {
         this.drawing = true;
         this.current.x = coords.x;
         this.current.y = coords.y;
+        this.drawLine(this.current.x, this.current.y, this.current.x, this.current.y, this.current.color, this.current.size, true);
         break;
       case 'mousemove':
         if (!this.drawing) return;
@@ -193,6 +194,7 @@ function App() {
         this.drawing = true;
         this.current.x = coords.x;
         this.current.y = coords.y;
+        this.drawLine(this.current.x, this.current.y, this.current.x, this.current.y, this.current.color, this.current.size, true);
         break;
       case 'touchmove':
         if (!this.drawing) return;
@@ -268,20 +270,17 @@ function Chat() {
     this.addSocketListeners();
 
     window.addEventListener('keydown', (event) => {
-      if (this.element.classList.contains('closed')) return;
-
-      if (this.username && event.keyCode === 27) {
-        this.onChatToggle();
-      }
-
-      if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+      if (!this.element.classList.contains('closed')) {
         this.currentInput.focus();
-      }
-      if (event.keyCode === 13) {
-        if (this.username) {
-          this.sendMessage();
-        } else {
-          this.setUsername();
+        if (event.keyCode === 13) {
+          if (this.username) {
+            this.sendMessage();
+          } else {
+            this.setUsername();
+          }
+        }
+        if (this.username && event.keyCode === 27) {
+          this.onChatToggle();
         }
       }
     });
